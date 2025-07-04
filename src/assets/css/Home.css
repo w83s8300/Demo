@@ -51,7 +51,4 @@
   padding-top: 50px; /* Adjust this value based on your navbar's actual height */
 }
 
-/* Remove modal backdrop */
-.modal-backdrop {
-  display: none !important;
-}
+

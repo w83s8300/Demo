@@ -27,7 +27,7 @@
     <NewsList @show-detail="showNewsDetail" data-aos="fade-up" />
 
     <!-- News Detail Modal -->
-    <div class="modal fade" id="newsDetailModal" tabindex="-1" aria-labelledby="newsDetailModalLabel" aria-hidden="true">
+    <div class="modal fade" id="newsDetailModal" tabindex="-1" aria-labelledby="newsDetailModalLabel" aria-hidden="true" data-bs-backdrop="true">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">

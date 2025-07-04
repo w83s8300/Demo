@@ -6,26 +6,3 @@
   color: #2c3e50;
 }
 
-.modal-content {
-  background-color: #fff; /* White background for modal content */
-  color: #212529; /* Dark text color for modal content */
-  pointer-events: auto !important; /* Ensure content is clickable */
-  z-index: 1051 !important; /* Ensure modal content is above backdrop */
-}
-
-.modal-body {
-  background-color: #f8f9fa; /* Light gray background for modal body */
-  color: #212529; /* Dark text color for modal body */
-}
-
-/* Revert to more standard Bootstrap z-index, but ensure backdrop allows clicks through */
-.modal-backdrop {
-  pointer-events: none !important; /* Allow clicks to pass through the backdrop */
-  background-color: rgba(0, 0, 0, 0.5) !important; /* Make backdrop visible for testing */
-}
-
-/* Ensure the modal itself is clickable and visible */
-.modal {
-  pointer-events: auto !important;
-  z-index: 1050 !important;
-}
