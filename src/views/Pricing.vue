@@ -25,7 +25,6 @@
                 <li>-</li>
                 <li>-</li>
               </ul>
-              <button type="button" class="btn btn-outline-primary">選擇方案</button>
             </div>
           </div>
         </div>
@@ -42,7 +41,6 @@
                 <li>適合規律學習者</li>
                 <li>-</li>
               </ul>
-              <button type="button" class="btn btn-primary">選擇方案</button>
             </div>
           </div>
         </div>
@@ -59,14 +57,13 @@
                 <li>適合重度舞蹈愛好者</li>
                 <li>贈送品牌毛巾</li>
               </ul>
-              <button type="button" class="btn btn-primary">選擇方案</button>
             </div>
           </div>
         </div>
         <!-- Card 4: VIP -->
         <div class="col-lg-3 col-md-6 mb-4">
-          <div class="card text-center h-100 border-primary">
-            <div class="card-header bg-primary text-white"><h4>VIP 月費</h4></div>
+          <div class="card text-center h-100 ">
+            <div class="card-header"><h4> 月費</h4></div>
             <div class="card-body">
               <h5 class="card-title">$8,000</h5>
               <p class="card-text">/ 月</p>
@@ -76,7 +73,6 @@
                 <li>場地租借 8 折優惠</li>
                 <li>商品購買 9 折優惠</li>
               </ul>
-              <button type="button" class="btn btn-primary">選擇方案</button>
             </div>
           </div>
         </div>

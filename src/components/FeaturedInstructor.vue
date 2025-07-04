@@ -10,7 +10,7 @@
           <h3>Teacher Name</h3>
           <p class="lead">專長：Hip Hop, Locking</p>
           <p>老師擁有超過十年的舞蹈經驗，活躍於各大舞蹈比賽與商業演出。教學風格風趣幽默，深受學生喜愛。老師相信，舞蹈不僅是技巧的展現，更是情感的表達，希望能帶領學生找到屬於自己的舞蹈靈魂。</p>
-          <a href="#" class="btn btn-outline-dark">了解更多</a>
+          <router-link to="/instructors" class="btn btn-outline-dark">了解更多</router-link>
         </div>
       </div>
     </div>
