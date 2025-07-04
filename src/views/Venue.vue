@@ -51,7 +51,7 @@
       <!-- 3. Pricing Table -->
       <div class="mb-5">
         <h3 class="text-center mb-4">租借價目表</h3>
-        <table class="table table-bordered text-center">
+        <table class="table table-bordered text-center venue-table">
           <thead class="table-dark">
             <tr>
               <th>時段</th>

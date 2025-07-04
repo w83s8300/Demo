@@ -2,13 +2,20 @@
   <div class="container my-5">
     <h2 class="text-center mb-4">最新消息</h2>
     <div class="list-group">
-      <a class="list-group-item list-group-item-action" v-for="(newsItem, index) in news" :key="index" @click.prevent="emitShowDetail(newsItem)">
+      <button type="button" class="list-group-item list-group-item-action" v-for="(newsItem, index) in news" :key="index" @click.prevent="emitShowDetail(newsItem)">
         <div class="d-flex w-100 justify-content-between">
           <h5 class="mb-1">{{ newsItem.title }}</h5>
           <small>{{ newsItem.date }}</small>
         </div>
         <p class="mb-1">{{ newsItem.summary }}</p>
-      </a>
+      </button>
+      <!-- <a class="list-group-item list-group-item-action" v-for="(newsItem, index) in news" :key="index" @click.prevent="emitShowDetail(newsItem)">
+        <div class="d-flex w-100 justify-content-between">
+          <h5 class="mb-1">{{ newsItem.title }}</h5>
+          <small>{{ newsItem.date }}</small>
+        </div>
+        <p class="mb-1">{{ newsItem.summary }}</p>
+      </a> -->
     </div>
   </div>
 </template>

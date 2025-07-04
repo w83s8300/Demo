@@ -27,7 +27,7 @@
 
       <!-- Desktop Table View -->
       <div class="table-responsive d-none d-lg-block">
-        <table class="table table-bordered table-dark table-striped text-center schedule-table">
+        <table class="table table-bordered table-Secondary table-striped text-center schedule-table">
           <thead>
             <tr>
               <th>時間</th>
