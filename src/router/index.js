@@ -52,6 +52,51 @@ const routes = [
     path: '/schedule',
     name: 'Schedule',
     component: () => import('../views/Schedule.vue')
+  },
+  {
+    path: '/add-student',
+    name: 'AddStudent',
+    component: () => import('../views/AddStudent.vue')
+  },
+  {
+    path: '/styles',
+    name: 'Styles',
+    component: () => import('../views/Styles.vue')
+  },
+  {
+    path: '/add-teacher',
+    name: 'AddTeacher',
+    component: () => import('../views/AddTeacher.vue')
+  },
+  {
+    path: '/teachers',
+    name: 'Teachers',
+    component: () => import('../views/Teachers.vue')
+  },
+  {
+    path: '/students',
+    name: 'Students',
+    component: () => import('../views/Students.vue')
+  },
+  {
+    path: '/add-course',
+    name: 'AddCourse',
+    component: () => import('../views/AddCourse.vue')
+  },
+  {
+    path: '/add-room',
+    name: 'AddRoom',
+    component: () => import('../views/AddRoom.vue')
+  },
+  {
+    path: '/rooms',
+    name: 'Rooms',
+    component: () => import('../views/Rooms.vue')
+  },
+  {
+    path: '/courses',
+    name: 'Courses',
+    component: () => import('../views/Courses.vue')
   }
 ];
 
