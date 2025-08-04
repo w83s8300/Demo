@@ -163,7 +163,7 @@ export default {
       showModal: false,
       selectedLesson: null,
       studentName: '',
-      danceTypes: ['全部', 'Hip Hop', 'Jazz', 'K-POP', 'Locking', 'Waacking', 'Breaking', 'Popping', 'Heels', 'Contemporary', 'Vogue'],
+      danceTypes: [], // 從後端取得
       selectedDanceType: '全部',
       timeSlots: [
         '09:00 - 10:00', '10:00 - 11:00', '11:00 - 12:00',
@@ -179,9 +179,23 @@ export default {
     };
   },
   mounted() {
+    this.fetchDanceTypes();
     this.fetchSchedule();
   },
   methods: {
+    async fetchDanceTypes() {
+      try {
+        const response = await fetch('http://localhost:8001/api/styles');
+        const result = await response.json();
+        if (response.ok && result.success) {
+          this.danceTypes = ['全部', ...result.styles.map(s => s.name)];
+        } else {
+          this.danceTypes = ['全部'];
+        }
+      } catch (error) {
+        this.danceTypes = ['全部'];
+      }
+    },
     async fetchSchedule() {
       // 計算本月第一天和最後一天
       const year = this.selectedYear;
