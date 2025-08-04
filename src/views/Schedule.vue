@@ -12,6 +12,17 @@
     <div class="container my-5">
       <h2 class="text-center mb-4">完整課程時間表</h2>
 
+      <!-- 年月選擇器 -->
+      <div class="d-flex justify-content-center mb-4">
+        <select v-model="selectedYear" class="form-select w-auto mx-2">
+          <option v-for="year in years" :key="year" :value="year">{{ year }} 年</option>
+        </select>
+        <select v-model="selectedMonth" class="form-select w-auto mx-2">
+          <option v-for="month in months" :key="month" :value="month">{{ month }} 月</option>
+        </select>
+        <button class="btn btn-primary mx-2" @click="fetchSchedule">查詢</button>
+      </div>
+
       <!-- Dance Type Filters -->
       <div class="d-flex justify-content-center flex-wrap mb-4 filter-buttons">
         <button
@@ -160,46 +171,50 @@ export default {
         '19:00 - 20:00', '20:00 - 21:00', '21:00 - 22:00'
       ],
       daysOfWeek: ['週一', '週二', '週三', '週四', '週五', '週六', '週日'],
-      classes: [
-        // Monday
-        { time: '10:00 - 11:00', day: '週一', name: 'Contemporary', teacher: '老師A', level: '初', type: 'Contemporary' },
-        { time: '14:00 - 15:00', day: '週一', name: 'Hip Hop', teacher: '老師B', level: '中', type: 'Hip Hop' },
-        { time: '19:00 - 20:00', day: '週一', name: 'Locking', teacher: '老師C', level: '進階', type: 'Locking' },
-        { time: '20:00 - 21:00', day: '週一', name: 'Breaking', teacher: '老師D', level: '中', type: 'Breaking' },
-        // Tuesday
-        { time: '11:00 - 12:00', day: '週二', name: 'Popping', teacher: '老師E', level: '初', type: 'Popping' },
-        { time: '15:00 - 16:00', day: '週二', name: 'Waacking', teacher: '老師F', level: '中', type: 'Waacking' },
-        { time: '18:00 - 19:00', day: '週二', name: 'Hip Hop', teacher: '老師G', level: '進階', type: 'Hip Hop' },
-        { time: '20:00 - 21:00', day: '週二', name: 'Popping', teacher: '老師H', level: '進階', type: 'Popping' },
-        { time: '21:00 - 22:00', day: '週二', name: 'Vogue', teacher: '老師I', level: '進階', type: 'Vogue' },
-        // Wednesday
-        { time: '09:00 - 10:00', day: '週三', name: 'Jazz', teacher: '老師J', level: '入門', type: 'Jazz' },
-        { time: '14:00 - 15:00', day: '週三', name: 'Heels', teacher: '老師K', level: '初', type: 'Heels' },
-        { time: '19:00 - 20:00', day: '週三', name: 'Hip Hop', teacher: '老師L', level: '專攻', type: 'Hip Hop' },
-        { time: '21:00 - 22:00', day: '週三', name: 'Locking', teacher: '老師M', level: '專攻', type: 'Locking' },
-        // Thursday
-        { time: '10:00 - 11:00', day: '週四', name: 'K-POP', teacher: '老師N', level: '入門', type: 'K-POP' },
-        { time: '15:00 - 16:00', day: '週四', name: 'Vogue', teacher: '老師O', level: '中', type: 'Vogue' },
-        { time: '18:00 - 19:00', day: '週四', name: 'Jazz', teacher: '老師P', level: '進階', type: 'Jazz' },
-        { time: '20:00 - 21:00', day: '週四', name: 'Heels', teacher: '老師Q', level: '進階', type: 'Heels' },
-        // Friday
-        { time: '11:00 - 12:00', day: '週五', name: 'Breaking', teacher: '老師R', level: '入門', type: 'Breaking' },
-        { time: '19:00 - 20:00', day: '週五', name: 'Waacking', teacher: '老師S', level: '進階', type: 'Waacking' },
-        { time: '21:00 - 22:00', day: '週五', name: 'Popping', teacher: '老師T', level: '專攻', type: 'Popping' },
-        // Saturday
-        { time: '09:00 - 10:00', day: '週六', name: 'Hip Hop', teacher: '老師U', level: '初', type: 'Hip Hop' },
-        { time: '14:00 - 15:00', day: '週六', name: 'Jazz', teacher: '老師V', level: '中', type: 'Jazz' },
-        { time: '18:00 - 19:00', day: '週六', name: 'K-POP', teacher: '老師W', level: '進階', type: 'K-POP' },
-        { time: '19:00 - 20:00', day: '週六', name: 'Street Jazz', teacher: '老師X', level: '進階', type: 'Jazz' },
-        { time: '20:00 - 21:00', day: '週六', name: 'Contemporary', teacher: '老師Y', level: '進階', type: 'Contemporary' },
-        // Sunday
-        { time: '10:00 - 11:00', day: '週日', name: 'Locking', teacher: '老師Z', level: '初', type: 'Locking' },
-        { time: '14:00 - 15:00', day: '週日', name: 'K-POP', teacher: '老師AA', level: '中', type: 'K-POP' },
-        { time: '19:00 - 20:00', day: '週日', name: 'K-POP', teacher: '老師BB', level: '專攻', type: 'K-POP' },
-      ]
+      classes: [], // 從後端取得
+      years: [2024, 2025, 2026],
+      months: [1,2,3,4,5,6,7,8,9,10,11,12],
+      selectedYear: new Date().getFullYear(),
+      selectedMonth: new Date().getMonth() + 1
     };
   },
+  mounted() {
+    this.fetchSchedule();
+  },
   methods: {
+    async fetchSchedule() {
+      // 計算本月第一天和最後一天
+      const year = this.selectedYear;
+      const month = this.selectedMonth;
+      const start_date = `${year}-${String(month).padStart(2, '0')}-01`;
+      const end_date = `${year}-${String(month).padStart(2, '0')}-31`;
+      try {
+        const response = await fetch(`http://localhost:8001/api/schedules?start_date=${start_date}&end_date=${end_date}`);
+        const result = await response.json();
+        if (response.ok && result.success) {
+          // 轉換後端資料格式為前端課表格式
+          this.classes = result.schedules.map(s => ({
+            time: `${s.start_time} - ${s.end_time}`,
+            day: this.getDayText(s.day_of_week),
+            name: s.course_name,
+            teacher: s.teacher_name || '',
+            level: s.level,
+            type: s.type
+          }));
+        } else {
+          this.classes = [];
+        }
+      } catch (error) {
+        this.classes = [];
+      }
+    },
+    getDayText(dayOfWeek) {
+      // 英文轉中文
+      const map = {
+        'Monday': '週一', 'Tuesday': '週二', 'Wednesday': '週三', 'Thursday': '週四', 'Friday': '週五', 'Saturday': '週六', 'Sunday': '週日'
+      };
+      return map[dayOfWeek] || dayOfWeek;
+    },
     getFilteredLessons(time, day) {
       return this.classes.filter(lesson => {
         const matchesTime = lesson.time === time;

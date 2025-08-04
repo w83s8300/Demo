@@ -22,6 +22,41 @@
   transform: translate(-50%, -50%);
 }
 
+/* Date Selector Styles */
+.date-selector-container {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 20px;
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.date-selector-container .form-label {
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.date-selector-container .form-control {
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 1rem;
+}
+
+.date-selector-container .btn-outline-light {
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.date-selector-container .btn-outline-light:hover {
+  background: white;
+  color: #333;
+  transform: translateY(-2px);
+}
+
 .table-dark {
     background-color: #2c2c2c;
 }
@@ -121,6 +156,18 @@
 .bg-heels { background-color: #d63384 !important; color: black !important; }
 .bg-contemporary { background-color: #1abc9c !important; color: black !important; }
 .bg-vogue { background-color: #f1c40f !important; color: black !important; }
+
+/* New dance type colors for database integration */
+.bg-ballet { background-color: #ff9999 !important; color: black !important; }
+.bg-modern { background-color: #99ccff !important; color: black !important; }
+.bg-default { background-color: #6c757d !important; color: white !important; }
+
+.lesson-room {
+  font-size: 0.7rem;
+  margin-bottom: 0;
+  font-style: italic;
+  opacity: 0.8;
+}
 
 .legend-badge {
     font-size: 1rem;
