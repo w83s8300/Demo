@@ -63,7 +63,7 @@
             </div>
           </div>
           <div class="col-md-6 text-center text-md-end">
-            <p class="mb-0">地址：台北市信義區忠孝東路五段123號</p>
+            <p class="mb-0">地址：402台中市南區工學路169號2樓</p>
             <p class="mb-0">電話：(02) 1234-5678</p>
           </div>
         </div>
