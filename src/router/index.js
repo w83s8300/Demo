@@ -61,7 +61,7 @@ const routes = [
     component: Admin,
     children: [
       {
-        path: 'add-student',
+        path: 'add-student/:id?',
         name: 'AddStudent',
         component: () => import('../views/AddStudent.vue')
       },

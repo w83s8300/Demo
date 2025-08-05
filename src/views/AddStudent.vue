@@ -1,7 +1,7 @@
 <template>
   <div class="add-student">
-    <h2>新增學生</h2>
-    <form @submit.prevent="addStudent">
+    <h2>{{ isEditing ? '編輯學生' : '新增學生' }}</h2>
+    <form @submit.prevent="submitForm">
       <div class="form-group">
         <label for="name">姓名:</label>
         <input type="text" id="name" v-model="student.name" required>
@@ -38,7 +38,8 @@
         <label for="membership_expiry">會員到期日:</label>
         <input type="date" id="membership_expiry" v-model="student.membership_expiry">
       </div>
-      <button type="submit">新增</button>
+      <button type="submit" class="btn btn-primary">{{ isEditing ? '更新' : '新增' }}</button>
+      <button type="button" class="btn btn-secondary ms-2" @click="$emit('close-modal')">取消</button>
     </form>
   </div>
 </template>
@@ -47,6 +48,12 @@
 import axios from 'axios';
 
 export default {
+  props: {
+    studentId: {
+      type: Number,
+      default: null
+    }
+  },
   data() {
     return {
       student: {
@@ -59,31 +66,79 @@ export default {
         medical_notes: '',
         remaining_classes: 0,
         membership_expiry: ''
-      }
+      },
+      isEditing: false
     };
   },
+  watch: {
+    studentId: {
+      immediate: true,
+      handler(newId) {
+        if (newId) {
+          this.isEditing = true;
+          this.fetchStudentData(newId);
+        } else {
+          this.isEditing = false;
+          this.resetForm();
+        }
+      }
+    }
+  },
   methods: {
+    resetForm() {
+      this.student = {
+        name: '',
+        email: '',
+        phone: '',
+        age: null,
+        emergency_contact: '',
+        emergency_phone: '',
+        medical_notes: '',
+        remaining_classes: 0,
+        membership_expiry: ''
+      };
+    },
+    fetchStudentData(id) {
+      axios.get(`http://localhost:8001/api/students/${id}`)
+        .then(response => {
+          this.student = response.data.student;
+          if (this.student.membership_expiry) {
+            this.student.membership_expiry = this.student.membership_expiry.split('T')[0];
+          }
+        })
+        .catch(error => {
+          console.error('獲取學生資料失敗:', error);
+          alert('獲取學生資料失敗！');
+          this.$emit('close-modal'); // 獲取失敗時關閉 modal
+        });
+    },
+    submitForm() {
+      if (this.isEditing) {
+        this.updateStudent();
+      } else {
+        this.addStudent();
+      }
+    },
     addStudent() {
       axios.post('http://localhost:8001/api/students', this.student)
-        .then(response => {
-          console.log(response.data);
+        .then(() => {
           alert('學生新增成功！');
-          // 清空表單
-          this.student = {
-            name: '',
-            email: '',
-            phone: '',
-            age: null,
-            emergency_contact: '',
-            emergency_phone: '',
-            medical_notes: '',
-            remaining_classes: 0,
-            membership_expiry: ''
-          };
+          this.$emit('student-updated');
         })
         .catch(error => {
           console.error(error);
           alert('新增學生失敗！');
+        });
+    },
+    updateStudent() {
+      axios.put(`http://localhost:8001/api/students/${this.studentId}`, this.student)
+        .then(() => {
+          alert('學生更新成功！');
+          this.$emit('student-updated');
+        })
+        .catch(error => {
+          console.error(error);
+          alert('更新學生失敗！');
         });
     }
   }
