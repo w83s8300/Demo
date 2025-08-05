@@ -7,6 +7,8 @@
         <p><strong>電子郵件:</strong> {{ student.email }}</p>
         <p><strong>電話:</strong> {{ student.phone }}</p>
         <p><strong>年齡:</strong> {{ student.age }}</p>
+        <p><strong>剩餘堂數:</strong> {{ student.remaining_classes || 0 }}</p>
+        <p><strong>會員到期日:</strong> {{ formatDate(student.membership_expiry) }}</p>
         <p><strong>緊急聯絡人:</strong> {{ student.emergency_contact }}</p>
         <p><strong>緊急聯絡人電話:</strong> {{ student.emergency_phone }}</p>
         <p><strong>醫療備註:</strong> {{ student.medical_notes }}</p>
@@ -36,6 +38,11 @@ export default {
         .catch(error => {
           console.error('獲取學生列表失敗:', error);
         });
+    },
+    formatDate(dateString) {
+      if (!dateString) return '未設定';
+      const date = new Date(dateString);
+      return date.toLocaleDateString('zh-TW');
     }
   }
 };

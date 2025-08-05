@@ -30,6 +30,14 @@
         <label for="medical_notes">醫療備註:</label>
         <textarea id="medical_notes" v-model="student.medical_notes"></textarea>
       </div>
+      <div class="form-group">
+        <label for="remaining_classes">剩餘堂數:</label>
+        <input type="number" id="remaining_classes" v-model="student.remaining_classes" min="0" placeholder="0">
+      </div>
+      <div class="form-group">
+        <label for="membership_expiry">會員到期日:</label>
+        <input type="date" id="membership_expiry" v-model="student.membership_expiry">
+      </div>
       <button type="submit">新增</button>
     </form>
   </div>
@@ -48,7 +56,9 @@ export default {
         age: null,
         emergency_contact: '',
         emergency_phone: '',
-        medical_notes: ''
+        medical_notes: '',
+        remaining_classes: 0,
+        membership_expiry: ''
       }
     };
   },
@@ -66,7 +76,9 @@ export default {
             age: null,
             emergency_contact: '',
             emergency_phone: '',
-            medical_notes: ''
+            medical_notes: '',
+            remaining_classes: 0,
+            membership_expiry: ''
           };
         })
         .catch(error => {
