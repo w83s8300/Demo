@@ -44,37 +44,7 @@
               <router-link class="nav-link" to="/contact" @click="closeNavbar">聯絡我們</router-link>
             </li>
             <li class="nav-item">
-              <router-link class="nav-link" to="/add-student" @click="closeNavbar">新增學生</router-link>
-            </li>
-            <li class="nav-item">
-              <router-link class="nav-link" to="/styles" @click="closeNavbar">風格</router-link>
-            </li>
-            <li class="nav-item">
-              <router-link class="nav-link" to="/add-teacher" @click="closeNavbar">新增老師</router-link>
-            </li>
-            <li class="nav-item">
-              <router-link class="nav-link" to="/teachers" @click="closeNavbar">老師列表</router-link>
-            </li>
-            <li class="nav-item">
-              <router-link class="nav-link" to="/students" @click="closeNavbar">學生列表</router-link>
-            </li>
-            <li class="nav-item">
-              <router-link class="nav-link" to="/add-course" @click="closeNavbar">新增課程</router-link>
-            </li>
-            <li class="nav-item">
-              <router-link class="nav-link" to="/add-room" @click="closeNavbar">新增教室</router-link>
-            </li>
-            <li class="nav-item">
-              <router-link class="nav-link" to="/rooms" @click="closeNavbar">教室列表</router-link>
-            </li>
-            <li class="nav-item">
-              <router-link class="nav-link" to="/courses" @click="closeNavbar">課程列表</router-link>
-            </li>
-            <li class="nav-item">
-              <router-link class="nav-link" to="/add-schedule" @click="closeNavbar">新增課程時間表</router-link>
-            </li>
-            <li class="nav-item">
-              <router-link class="nav-link" to="/schedules" @click="closeNavbar">課程時間表</router-link>
+              <router-link class="nav-link" to="/admin" @click="closeNavbar">管理</router-link>
             </li>
           </ul>
         </div>
