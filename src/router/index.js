@@ -71,7 +71,7 @@ const routes = [
         component: () => import('../views/Styles.vue')
       },
       {
-        path: 'add-teacher',
+        path: 'add-teacher/:id?',
         name: 'AddTeacher',
         component: () => import('../views/AddTeacher.vue')
       },

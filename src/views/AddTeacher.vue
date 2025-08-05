@@ -1,7 +1,6 @@
 <template>
   <div class="add-teacher">
-    <h2>新增老師</h2>
-    <form @submit.prevent="addTeacher">
+    <form @submit.prevent="submitForm">
       <div class="form-group">
         <label for="name">姓名:</label>
         <input type="text" id="name" v-model="teacher.name" required>
@@ -33,7 +32,8 @@
           <label :for="'style-' + style.id">{{ style.name }}</label>
         </div>
       </div>
-      <button type="submit">新增</button>
+      <button type="submit" class="btn btn-primary">{{ isEditMode ? '更新' : '新增' }}</button>
+      <button type="button" class="btn btn-secondary" @click="closeModal">取消</button>
     </form>
   </div>
 </template>
@@ -42,6 +42,12 @@
 import axios from 'axios';
 
 export default {
+  props: {
+    teacherId: {
+      type: Number,
+      default: null
+    }
+  },
   data() {
     return {
       teacher: {
@@ -53,11 +59,16 @@ export default {
         hourly_rate: null,
         style_ids: []
       },
-      styles: []
+      styles: [],
+      isEditMode: false
     };
   },
   created() {
     this.fetchStyles();
+    if (this.teacherId) {
+      this.isEditMode = true;
+      this.fetchTeacher(this.teacherId);
+    }
   },
   methods: {
     fetchStyles() {
@@ -69,26 +80,47 @@ export default {
           console.error('獲取風格列表失敗:', error);
         });
     },
+    fetchTeacher(id) {
+      axios.get(`http://localhost:8001/api/teachers/${id}`)
+        .then(response => {
+          this.teacher = response.data.teacher;
+          this.teacher.style_ids = response.data.teacher.styles.map(s => s.id);
+        })
+        .catch(error => {
+          console.error('獲取老師資料失敗:', error);
+        });
+    },
+    submitForm() {
+      if (this.isEditMode) {
+        this.updateTeacher();
+      } else {
+        this.addTeacher();
+      }
+    },
     addTeacher() {
       axios.post('http://localhost:8001/api/teachers', this.teacher)
-        .then(response => {
-          console.log(response.data);
+        .then(() => {
           alert('老師新增成功！');
-          // 清空表單
-          this.teacher = {
-            name: '',
-            email: '',
-            phone: '',
-            experience_years: null,
-            bio: '',
-            hourly_rate: null,
-            style_ids: []
-          };
+          this.$emit('teacher-updated');
         })
         .catch(error => {
           console.error(error);
           alert('新增老師失敗！');
         });
+    },
+    updateTeacher() {
+      axios.put(`http://localhost:8001/api/teachers/${this.teacher.id}`, this.teacher)
+        .then(() => {
+          alert('老師更新成功！');
+          this.$emit('teacher-updated');
+        })
+        .catch(error => {
+          console.error(error);
+          alert('更新老師失敗！');
+        });
+    },
+    closeModal() {
+      this.$emit('close-modal');
     }
   }
 };
@@ -111,10 +143,6 @@ input, textarea {
   box-sizing: border-box;
 }
 button {
-  padding: 10px 15px;
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  cursor: pointer;
+  margin-right: 10px;
 }
 </style>
