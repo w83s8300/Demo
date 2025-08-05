@@ -12,14 +12,17 @@
     <div class="container my-5">
       <h2 class="text-center mb-4">完整課程時間表</h2>
 
-      <!-- 年月選擇器 -->
+      <!-- 週選擇器 -->
       <div class="d-flex justify-content-center mb-4">
-        <select v-model="selectedYear" class="form-select w-auto mx-2">
-          <option v-for="year in years" :key="year" :value="year">{{ year }} 年</option>
-        </select>
-        <select v-model="selectedMonth" class="form-select w-auto mx-2">
-          <option v-for="month in months" :key="month" :value="month">{{ month }} 月</option>
-        </select>
+        <input 
+          type="date" 
+          v-model="selectedWeekStart" 
+          class="form-control w-auto mx-2" 
+          @change="calculateWeekDates"
+        />
+        <span class="mx-2 align-self-center">
+          {{ formatDateRange(weekStartDate, weekEndDate) }}
+        </span>
         <button class="btn btn-primary mx-2" @click="fetchSchedule">查詢</button>
       </div>
 
@@ -42,13 +45,10 @@
           <thead>
             <tr>
               <th>時間</th>
-              <th>週一</th>
-              <th>週二</th>
-              <th>週三</th>
-              <th>週四</th>
-              <th>週五</th>
-              <th>週六</th>
-              <th>週日</th>
+              <th v-for="(day, index) in daysOfWeek" :key="index">
+                {{ day }}<br/>
+                <small>{{ getDateForDay(index) }}</small>
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -77,7 +77,7 @@
       <div class="d-lg-none">
         <template v-for="(day, dayIndex) in daysOfWeek" :key="dayIndex">
           <div v-if="getLessonsForDay(day).length > 0" class="mb-4">
-            <h3 class="text-center">{{ day }}</h3>
+            <h3 class="text-center">{{ day }} {{ getDateForDay(dayIndex) }}</h3>
             <div 
               v-for="(lesson, lessonIndex) in getLessonsForDay(day)" 
               :key="lessonIndex" 
@@ -125,10 +125,10 @@
                 <strong>舞蹈類型：</strong>{{ selectedLesson.type }}
               </div>
             </div>
-            <div class="lesson-description">
+            <!-- <div class="lesson-description">
               <h6>課程介紹</h6>
               <p>{{ getLessonDescription(selectedLesson.type) }}</p>
-            </div>
+            </div> -->
             <div class="enrollment-form">
               <h6>報名資訊</h6>
                 <div class="form-group row">
@@ -172,13 +172,14 @@ export default {
       ],
       daysOfWeek: ['週一', '週二', '週三', '週四', '週五', '週六', '週日'],
       classes: [], // 從後端取得
-      years: [2024, 2025, 2026],
-      months: [1,2,3,4,5,6,7,8,9,10,11,12],
-      selectedYear: new Date().getFullYear(),
-      selectedMonth: new Date().getMonth() + 1
+      selectedWeekStart: '',
+      weekStartDate: null,
+      weekEndDate: null,
+      weekDates: [] // 儲存該週的七天日期
     };
   },
   mounted() {
+    this.initializeCurrentWeek();
     this.fetchDanceTypes();
     this.fetchSchedule();
   },
@@ -197,24 +198,31 @@ export default {
       }
     },
     async fetchSchedule() {
-      // 計算本月第一天和最後一天
-      const year = this.selectedYear;
-      const month = this.selectedMonth;
-      const start_date = `${year}-${String(month).padStart(2, '0')}-01`;
-      const end_date = `${year}-${String(month).padStart(2, '0')}-31`;
+      if (!this.weekStartDate || !this.weekEndDate) {
+        return;
+      }
+      
+      // 格式化日期為 YYYY-MM-DD
+      const start_date = this.formatDateForAPI(this.weekStartDate);
+      const end_date = this.formatDateForAPI(this.weekEndDate);
+      
       try {
         const response = await fetch(`http://localhost:8001/api/schedules?start_date=${start_date}&end_date=${end_date}`);
         const result = await response.json();
         if (response.ok && result.success) {
-          // 轉換後端資料格式為前端課表格式
+          // 動態生成時間段並轉換後端資料格式
+          this.generateTimeSlots(result.schedules);
           this.classes = result.schedules.map(s => ({
-            time: `${s.start_time} - ${s.end_time}`,
+            time: this.findMatchingTimeSlot(s.start_time, s.end_time),
+            originalStartTime: s.start_time,
+            originalEndTime: s.end_time,
             day: this.getDayText(s.day_of_week),
             name: s.course_name,
             teacher: s.teacher_name || '',
             level: s.level,
-            type: s.type
+            type: s.style_name || '未知類型' // 使用正確的欄位名稱 style_name
           }));
+          
         } else {
           this.classes = [];
         }
@@ -228,6 +236,105 @@ export default {
         'Monday': '週一', 'Tuesday': '週二', 'Wednesday': '週三', 'Thursday': '週四', 'Friday': '週五', 'Saturday': '週六', 'Sunday': '週日'
       };
       return map[dayOfWeek] || dayOfWeek;
+    },
+    initializeCurrentWeek() {
+      // 設定為當前週的週一
+      const today = new Date();
+      const currentDay = today.getDay(); // 0是週日，1是週一
+      const mondayOffset = currentDay === 0 ? -6 : 1 - currentDay; // 計算到週一的偏移
+      const monday = new Date(today);
+      monday.setDate(today.getDate() + mondayOffset);
+      
+      this.selectedWeekStart = this.formatDateForInput(monday);
+      this.calculateWeekDates();
+    },
+    calculateWeekDates() {
+      if (!this.selectedWeekStart) return;
+      
+      const startDate = new Date(this.selectedWeekStart);
+      this.weekStartDate = new Date(startDate);
+      
+      // 計算週日（週一 + 6天）
+      this.weekEndDate = new Date(startDate);
+      this.weekEndDate.setDate(startDate.getDate() + 6);
+      
+      // 計算該週的七天日期
+      this.weekDates = [];
+      for (let i = 0; i < 7; i++) {
+        const date = new Date(startDate);
+        date.setDate(startDate.getDate() + i);
+        this.weekDates.push(date);
+      }
+    },
+    getDateForDay(dayIndex) {
+      if (!this.weekDates[dayIndex]) return '';
+      const date = this.weekDates[dayIndex];
+      return `${date.getMonth() + 1}/${date.getDate()}`;
+    },
+    formatDateRange(startDate, endDate) {
+      if (!startDate || !endDate) return '';
+      const start = `${startDate.getMonth() + 1}/${startDate.getDate()}`;
+      const end = `${endDate.getMonth() + 1}/${endDate.getDate()}`;
+      return `${start} ~ ${end}`;
+    },
+    formatDateForInput(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    },
+    formatDateForAPI(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    },
+    generateTimeSlots(schedules) {
+      // 從API資料中收集所有不重複的時間段
+      const timeSlotSet = new Set();
+      
+      schedules.forEach(schedule => {
+        const startTime = this.formatTime(schedule.start_time);
+        const endTime = this.formatTime(schedule.end_time);
+        const timeSlot = `${startTime} - ${endTime}`;
+        timeSlotSet.add(timeSlot);
+      });
+      
+      // 將時間段轉換為陣列並排序
+      const newTimeSlots = Array.from(timeSlotSet).sort((a, b) => {
+        const timeA = a.split(' - ')[0];
+        const timeB = b.split(' - ')[0];
+        return timeA.localeCompare(timeB);
+      });
+      
+      // 如果有新的時間段，更新 timeSlots
+      if (newTimeSlots.length > 0) {
+        this.timeSlots = newTimeSlots;
+      }
+    },
+    formatTime(timeString) {
+      // 將 "14:50:00" 格式轉換為 "14:50"
+      if (timeString && timeString.includes(':')) {
+        const parts = timeString.split(':');
+        return `${parts[0]}:${parts[1]}`;
+      }
+      return timeString;
+    },
+    findMatchingTimeSlot(startTime, endTime) {
+      // 格式化時間
+      const formattedStart = this.formatTime(startTime);
+      const formattedEnd = this.formatTime(endTime);
+      const targetTimeSlot = `${formattedStart} - ${formattedEnd}`;
+      
+      // 在現有的 timeSlots 中尋找匹配的時間段
+      const matchingSlot = this.timeSlots.find(slot => slot === targetTimeSlot);
+      
+      if (matchingSlot) {
+        return matchingSlot;
+      }
+      
+      // 如果找不到完全匹配的，返回格式化後的時間段
+      return targetTimeSlot;
     },
     getFilteredLessons(time, day) {
       return this.classes.filter(lesson => {
