@@ -1,7 +1,6 @@
 <template>
   <div class="add-course">
-    <h2>新增課程</h2>
-    <form @submit.prevent="addCourse">
+    <form @submit.prevent="submitForm">
       <div class="form-group">
         <label for="name">課程名稱:</label>
         <input type="text" id="name" v-model="course.name" required>
@@ -44,7 +43,8 @@
           </option>
         </select>
       </div>
-      <button type="submit">新增</button>
+      <button type="submit" class="btn btn-primary">{{ isEditMode ? '更新' : '新增' }}</button>
+      <button type="button" class="btn btn-secondary" @click="closeModal">取消</button>
     </form>
   </div>
 </template>
@@ -53,6 +53,12 @@
 import axios from 'axios';
 
 export default {
+  props: {
+    courseId: {
+      type: Number,
+      default: null
+    }
+  },
   data() {
     return {
       course: {
@@ -66,12 +72,17 @@ export default {
         teacher_id: null
       },
       teachers: [],
-      styles: []
+      styles: [],
+      isEditMode: false
     };
   },
   created() {
     this.fetchTeachers();
     this.fetchStyles();
+    if (this.courseId) {
+      this.isEditMode = true;
+      this.fetchCourse(this.courseId);
+    }
   },
   methods: {
     fetchTeachers() {
@@ -92,27 +103,46 @@ export default {
           console.error('獲取風格列表失敗:', error);
         });
     },
+    fetchCourse(id) {
+      axios.get(`http://localhost:8001/api/courses/${id}`)
+        .then(response => {
+          this.course = response.data.course;
+        })
+        .catch(error => {
+          console.error('獲取課程資料失敗:', error);
+        });
+    },
+    submitForm() {
+      if (this.isEditMode) {
+        this.updateCourse();
+      } else {
+        this.addCourse();
+      }
+    },
     addCourse() {
       axios.post('http://localhost:8001/api/courses', this.course)
-        .then(response => {
-          console.log(response.data);
+        .then(() => {
           alert('課程新增成功！');
-          // 清空表單
-          this.course = {
-            name: '',
-            description: '',
-            level: '',
-            style_id: null,
-            duration_minutes: 60,
-            max_students: 15,
-            price: null,
-            teacher_id: null
-          };
+          this.$emit('course-updated');
         })
         .catch(error => {
           console.error(error);
           alert('新增課程失敗！');
         });
+    },
+    updateCourse() {
+      axios.put(`http://localhost:8001/api/courses/${this.course.id}`, this.course)
+        .then(() => {
+          alert('課程更新成功！');
+          this.$emit('course-updated');
+        })
+        .catch(error => {
+          console.error(error);
+          alert('更新課程失敗！');
+        });
+    },
+    closeModal() {
+      this.$emit('close-modal');
     }
   }
 };
@@ -135,10 +165,6 @@ input, textarea, select {
   box-sizing: border-box;
 }
 button {
-  padding: 10px 15px;
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  cursor: pointer;
+  margin-right: 10px;
 }
 </style>
