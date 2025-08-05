@@ -97,6 +97,16 @@ const routes = [
     path: '/courses',
     name: 'Courses',
     component: () => import('../views/Courses.vue')
+  },
+  {
+    path: '/add-schedule',
+    name: 'AddSchedule',
+    component: () => import('../views/AddSchedule.vue')
+  },
+  {
+    path: '/schedules',
+    name: 'Schedules',
+    component: () => import('../views/Schedules.vue')
   }
 ];
 

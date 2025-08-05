@@ -70,6 +70,12 @@
             <li class="nav-item">
               <router-link class="nav-link" to="/courses" @click="closeNavbar">課程列表</router-link>
             </li>
+            <li class="nav-item">
+              <router-link class="nav-link" to="/add-schedule" @click="closeNavbar">新增課程時間表</router-link>
+            </li>
+            <li class="nav-item">
+              <router-link class="nav-link" to="/schedules" @click="closeNavbar">課程時間表</router-link>
+            </li>
           </ul>
         </div>
       </div>
