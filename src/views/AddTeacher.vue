@@ -14,10 +14,6 @@
         <input type="tel" id="phone" v-model="teacher.phone">
       </div>
       <div class="form-group">
-        <label for="experience_years">教學經驗 (年):</label>
-        <input type="number" id="experience_years" v-model="teacher.experience_years">
-      </div>
-      <div class="form-group">
         <label for="bio">簡介:</label>
         <textarea id="bio" v-model="teacher.bio"></textarea>
       </div>

@@ -83,7 +83,7 @@ export default {
         {
           title: 'Teacher A',
           shortDescription: 'Hip Hop / Locking',
-          fullContent: 'Teacher A is an expert in Hip Hop and Locking styles, with over 10 years of experience in teaching and performing. They have participated in numerous competitions and workshops worldwide, bringing a wealth of knowledge to our studio.',
+          fullContent: 'Teacher A is an expert in Hip Hop and Locking styles. They have participated in numerous competitions and workshops worldwide, bringing a wealth of knowledge to our studio.',
           image: 'https://picsum.photos/600/400?random=5',
         },
         {

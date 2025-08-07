@@ -2,7 +2,11 @@
   <div class="teachers">
     <div class="d-flex justify-content-between align-items-center mb-3">
       <h2>老師列表</h2>
-      <button @click="addNewTeacher" class="btn btn-success">新增老師</button>
+      <div class="d-flex">
+        <input type="text" v-model="searchQuery" placeholder="搜尋老師姓名" class="form-control me-2">
+        <button @click="fetchTeachers" class="btn btn-outline-secondary">搜尋</button>
+        <button @click="addNewTeacher" class="btn btn-success ms-2">新增老師</button>
+      </div>
     </div>
     <table class="teacher-table">
       <thead>
@@ -10,7 +14,6 @@
           <th>姓名</th>
           <th>電子郵件</th>
           <th>電話</th>
-          <th>經驗</th>
           <th>時薪</th>
           <th>專長風格</th>
           <th>操作</th>
@@ -21,7 +24,6 @@
           <td>{{ teacher.name }}</td>
           <td>{{ teacher.email }}</td>
           <td>{{ teacher.phone }}</td>
-          <td>{{ teacher.experience_years }} 年</td>
           <td>{{ teacher.hourly_rate }}</td>
           <td>
             <ul>
@@ -65,6 +67,7 @@ export default {
   data() {
     return {
       teachers: [],
+      searchQuery: '',
       showEditModal: false, // 控制 AddTeacher 組件的渲染
       editingTeacherId: null,
       editModal: null // 用於儲存 Bootstrap Modal 實例
@@ -84,7 +87,11 @@ export default {
   },
   methods: {
     fetchTeachers() {
-      axios.get('http://localhost:8001/api/teachers')
+      let url = 'http://localhost:8001/api/teachers';
+      if (this.searchQuery) {
+        url += `?name=${this.searchQuery}`;
+      }
+      axios.get(url)
         .then(response => {
           this.teachers = response.data.teachers;
         })

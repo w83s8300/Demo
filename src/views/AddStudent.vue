@@ -15,8 +15,8 @@
         <input type="tel" id="phone" v-model="student.phone">
       </div>
       <div class="form-group">
-        <label for="age">年齡:</label>
-        <input type="number" id="age" v-model="student.age">
+        <label for="date_of_birth">出生年月日:</label>
+        <input type="date" id="date_of_birth" v-model="student.date_of_birth">
       </div>
       <div class="form-group">
         <label for="emergency_contact">緊急聯絡人:</label>
@@ -60,7 +60,7 @@ export default {
         name: '',
         email: '',
         phone: '',
-        age: null,
+        date_of_birth: null,
         emergency_contact: '',
         emergency_phone: '',
         medical_notes: '',
@@ -90,7 +90,7 @@ export default {
         name: '',
         email: '',
         phone: '',
-        age: null,
+        date_of_birth: null,
         emergency_contact: '',
         emergency_phone: '',
         medical_notes: '',

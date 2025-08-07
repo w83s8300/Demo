@@ -2,7 +2,11 @@
   <div class="students">
     <div class="d-flex justify-content-between align-items-center mb-3">
       <h2>學生列表</h2>
-      <button @click="addNewStudent" class="btn btn-success">新增學生</button>
+      <div class="d-flex">
+        <input type="text" v-model="searchQuery" placeholder="搜尋學生姓名" class="form-control me-2">
+        <button @click="fetchStudents" class="btn btn-outline-secondary">搜尋</button>
+        <button @click="addNewStudent" class="btn btn-success ms-2">新增學生</button>
+      </div>
     </div>
     <table class="student-table">
       <thead>
@@ -10,7 +14,7 @@
           <th>姓名</th>
           <th>電子郵件</th>
           <th>電話</th>
-          <th>年齡</th>
+          <th>出生年月日</th>
           <th>剩餘堂數</th>
           <th>會員到期日</th>
           <th>緊急聯絡人</th>
@@ -24,7 +28,7 @@
           <td>{{ student.name }}</td>
           <td>{{ student.email }}</td>
           <td>{{ student.phone }}</td>
-          <td>{{ student.age }}</td>
+          <td>{{ formatDate(student.date_of_birth) }}</td>
           <td>{{ student.remaining_classes || 0 }}</td>
           <td>{{ formatDate(student.membership_expiry) }}</td>
           <td>{{ student.emergency_contact }}</td>
@@ -67,6 +71,7 @@ export default {
   data() {
     return {
       students: [],
+      searchQuery: '',
       showEditModal: false, // 控制 AddStudent 組件的渲染
       editingStudentId: null,
       editModal: null // 用於儲存 Bootstrap Modal 實例
@@ -86,7 +91,11 @@ export default {
   },
   methods: {
     fetchStudents() {
-      axios.get('http://localhost:8001/api/students')
+      let url = 'http://localhost:8001/api/students';
+      if (this.searchQuery) {
+        url += `?name=${this.searchQuery}`;
+      }
+      axios.get(url)
         .then(response => {
           this.students = response.data.students;
         })
