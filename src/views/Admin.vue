@@ -5,15 +5,10 @@
       <nav>
         <ul>
           <li><router-link to="/admin/students">學生列表</router-link></li>
-          <li><router-link to="/admin/add-student">新增學生</router-link></li>
           <li><router-link to="/admin/teachers">老師列表</router-link></li>
-          <li><router-link to="/admin/add-teacher">新增老師</router-link></li>
           <li><router-link to="/admin/courses">課程列表</router-link></li>
-          <li><router-link to="/admin/add-course">新增課程</router-link></li>
           <li><router-link to="/admin/schedules">課程時間表</router-link></li>
-          <li><router-link to="/admin/add-schedule">新增課程時間表</router-link></li>
           <li><router-link to="/admin/rooms">教室列表</router-link></li>
-          <li><router-link to="/admin/add-room">新增教室</router-link></li>
           <li><router-link to="/admin/styles">風格</router-link></li>
         </ul>
       </nav>
