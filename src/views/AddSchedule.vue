@@ -1,7 +1,6 @@
 <template>
   <div class="add-schedule">
-    <h2>新增課程時間表</h2>
-    <form @submit.prevent="addSchedule">
+    <form @submit.prevent="submitForm">
       <div class="form-group">
         <label for="course_id">課程:</label>
         <select id="course_id" v-model="schedule.course_id" required>
@@ -31,7 +30,8 @@
         <label for="end_time">結束時間:</label>
         <input type="time" id="end_time" v-model="schedule.end_time" required>
       </div>
-      <button type="submit">新增</button>
+      <button type="submit" class="btn btn-primary">{{ isEditMode ? '更新' : '新增' }}</button>
+      <button type="button" class="btn btn-secondary" @click="closeModal">取消</button>
     </form>
   </div>
 </template>
@@ -40,6 +40,12 @@
 import axios from 'axios';
 
 export default {
+  props: {
+    scheduleId: {
+      type: Number,
+      default: null
+    }
+  },
   data() {
     return {
       schedule: {
@@ -50,12 +56,17 @@ export default {
         end_time: ''
       },
       courses: [],
-      rooms: []
+      rooms: [],
+      isEditMode: false
     };
   },
   created() {
     this.fetchCourses();
     this.fetchRooms();
+    if (this.scheduleId) {
+      this.isEditMode = true;
+      this.fetchSchedule(this.scheduleId);
+    }
   },
   methods: {
     fetchCourses() {
@@ -76,24 +87,50 @@ export default {
           console.error('獲取教室列表失敗:', error);
         });
     },
+    fetchSchedule(id) {
+      axios.get(`http://localhost:8001/api/schedules/${id}`)
+        .then(response => {
+          this.schedule = response.data.schedule;
+          // 確保日期格式正確，以便 input type="date" 顯示
+          if (this.schedule.schedule_date) {
+            this.schedule.schedule_date = this.schedule.schedule_date.split('T')[0];
+          }
+        })
+        .catch(error => {
+          console.error('獲取課程時間表資料失敗:', error);
+        });
+    },
+    submitForm() {
+      if (this.isEditMode) {
+        this.updateSchedule();
+      } else {
+        this.addSchedule();
+      }
+    },
     addSchedule() {
       axios.post('http://localhost:8001/api/schedules', this.schedule)
-        .then(response => {
-          console.log(response.data);
+        .then(() => {
           alert('課程時間表新增成功！');
-          // 清空表單
-          this.schedule = {
-            course_id: null,
-            room_id: null,
-            schedule_date: '',
-            start_time: '',
-            end_time: ''
-          };
+          this.$emit('schedule-updated');
         })
         .catch(error => {
           console.error(error);
           alert('新增課程時間表失敗！');
         });
+    },
+    updateSchedule() {
+      axios.put(`http://localhost:8001/api/schedules/${this.scheduleId}`, this.schedule)
+        .then(() => {
+          alert('課程時間表更新成功！');
+          this.$emit('schedule-updated');
+        })
+        .catch(error => {
+          console.error(error);
+          alert('更新課程時間表失敗！');
+        });
+    },
+    closeModal() {
+      this.$emit('close-modal');
     }
   }
 };

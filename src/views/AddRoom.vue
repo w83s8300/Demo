@@ -1,7 +1,6 @@
 <template>
   <div class="add-room">
-    <h2>新增教室</h2>
-    <form @submit.prevent="addRoom">
+    <form @submit.prevent="submitForm">
       <div class="form-group">
         <label for="name">教室名稱:</label>
         <input type="text" id="name" v-model="room.name" required>
@@ -26,7 +25,8 @@
         <input type="checkbox" id="is_available" v-model="room.is_available">
         <label for="is_available">是否可用</label>
       </div>
-      <button type="submit">新增</button>
+      <button type="submit" class="btn btn-primary">{{ isEditMode ? '更新' : '新增' }}</button>
+      <button type="button" class="btn btn-secondary" @click="closeModal">取消</button>
     </form>
   </div>
 </template>
@@ -35,6 +35,12 @@
 import axios from 'axios';
 
 export default {
+  props: {
+    roomId: {
+      type: Number,
+      default: null
+    }
+  },
   data() {
     return {
       room: {
@@ -44,29 +50,57 @@ export default {
         description: '',
         hourly_rate: null,
         is_available: true
-      }
+      },
+      isEditMode: false
     };
   },
+  created() {
+    if (this.roomId) {
+      this.isEditMode = true;
+      this.fetchRoom(this.roomId);
+    }
+  },
   methods: {
+    fetchRoom(id) {
+      axios.get(`http://localhost:8001/api/rooms/${id}`)
+        .then(response => {
+          this.room = response.data.room;
+        })
+        .catch(error => {
+          console.error('獲取教室資料失敗:', error);
+        });
+    },
+    submitForm() {
+      if (this.isEditMode) {
+        this.updateRoom();
+      } else {
+        this.addRoom();
+      }
+    },
     addRoom() {
       axios.post('http://localhost:8001/api/rooms', this.room)
-        .then(response => {
-          console.log(response.data);
+        .then(() => {
           alert('教室新增成功！');
-          // 清空表單
-          this.room = {
-            name: '',
-            capacity: 20,
-            equipment: '',
-            description: '',
-            hourly_rate: null,
-            is_available: true
-          };
+          this.$emit('room-updated');
         })
         .catch(error => {
           console.error(error);
           alert('新增教室失敗！');
         });
+    },
+    updateRoom() {
+      axios.put(`http://localhost:8001/api/rooms/${this.room.id}`, this.room)
+        .then(() => {
+          alert('教室更新成功！');
+          this.$emit('room-updated');
+        })
+        .catch(error => {
+          console.error(error);
+          alert('更新教室失敗！');
+        });
+    },
+    closeModal() {
+      this.$emit('close-modal');
     }
   }
 };

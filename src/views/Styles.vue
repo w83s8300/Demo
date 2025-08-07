@@ -1,46 +1,71 @@
 <template>
   <div class="styles">
-    <h2>風格管理</h2>
-    
-    <!-- 新增風格表單 -->
-    <form @submit.prevent="addStyle" class="add-style-form">
-      <h3>新增風格</h3>
-      <div class="form-group">
-        <label for="name">風格名稱:</label>
-        <input type="text" id="name" v-model="newStyle.name" required>
-      </div>
-      <div class="form-group">
-        <label for="description">風格描述:</label>
-        <textarea id="description" v-model="newStyle.description"></textarea>
-      </div>
-      <button type="submit">新增</button>
-    </form>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2>風格管理</h2>
+      <button @click="addNewStyle" class="btn btn-success">新增風格</button>
+    </div>
+    <table class="style-table">
+      <thead>
+        <tr>
+          <th>名稱</th>
+          <th>描述</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="style in styles" :key="style.id">
+          <td>{{ style.name }}</td>
+          <td>{{ style.description }}</td>
+          <td>
+            <button @click="editStyle(style.id)" class="btn btn-primary btn-sm">編輯</button>
+            <button @click="deleteStyle(style.id)" class="btn btn-danger btn-sm">移除</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
 
-    <!-- 風格列表 -->
-    <div class="style-list">
-      <h3>風格列表</h3>
-      <ul>
-        <li v-for="style in styles" :key="style.id">
-          <h4>{{ style.name }}</h4>
-          <p>{{ style.description }}</p>
-        </li>
-      </ul>
+    <!-- Bootstrap Modal for adding/editing style -->
+    <div class="modal fade" id="editStyleModal" tabindex="-1" aria-labelledby="editStyleModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editStyleModalLabel">{{ editingStyleId ? '編輯風格' : '新增風格' }}</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <AddStyle v-if="showEditModal" :styleId="editingStyleId" @style-updated="handleStyleUpdated" @close-modal="closeEditModal" />
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
 import axios from 'axios';
+import AddStyle from './AddStyle.vue'; // 引入 AddStyle 組件
+import { Modal } from 'bootstrap'; // 引入 Bootstrap Modal JS
 
 export default {
+  components: {
+    AddStyle
+  },
   data() {
     return {
       styles: [],
-      newStyle: {
-        name: '',
-        description: ''
-      }
+      showEditModal: false, // 控制 AddStyle 組件的渲染
+      editingStyleId: null,
+      editModal: null // 用於儲存 Bootstrap Modal 實例
     };
+  },
+  mounted() {
+    // 在組件掛載後初始化 Bootstrap Modal
+    this.editModal = new Modal(document.getElementById('editStyleModal'));
+    // 監聽 modal 關閉事件，以便重置狀態
+    document.getElementById('editStyleModal').addEventListener('hidden.bs.modal', () => {
+      this.showEditModal = false;
+      this.editingStyleId = null;
+    });
   },
   created() {
     this.fetchStyles();
@@ -55,22 +80,34 @@ export default {
           console.error('獲取風格列表失敗:', error);
         });
     },
-    addStyle() {
-      axios.post('http://localhost:8001/api/styles', this.newStyle)
-        .then(response => {
-          console.log(response.data);
-          alert('風格新增成功！');
-          this.fetchStyles(); // 重新獲取列表
-          // 清空表單
-          this.newStyle = {
-            name: '',
-            description: ''
-          };
-        })
-        .catch(error => {
-          console.error(error);
-          alert('新增風格失敗！');
-        });
+    addNewStyle() {
+      this.editingStyleId = null; // 設定為 null 表示新增模式
+      this.showEditModal = true; // 渲染 AddStyle 組件
+      this.editModal.show(); // 顯示 Bootstrap Modal
+    },
+    editStyle(id) {
+      this.editingStyleId = id;
+      this.showEditModal = true; // 渲染 AddStyle 組件
+      this.editModal.show(); // 顯示 Bootstrap Modal
+    },
+    deleteStyle(id) {
+      if (confirm('確定要刪除這個風格嗎？')) {
+        axios.delete(`http://localhost:8001/api/styles/${id}`)
+          .then(() => {
+            this.fetchStyles(); // Refresh the list after deletion
+          })
+          .catch(error => {
+            console.error('刪除風格失敗:', error);
+          });
+      }
+    },
+    handleStyleUpdated() {
+      this.fetchStyles(); // 風格數據更新後刷新列表
+      this.editModal.hide(); // 關閉 Bootstrap Modal
+    },
+    closeEditModal() {
+      // 由 AddStyle 組件發出，用於取消或錯誤時關閉 modal
+      this.editModal.hide();
     }
   }
 };
@@ -80,34 +117,19 @@ export default {
 .styles {
   padding: 20px;
 }
-.add-style-form, .style-list {
-  margin-bottom: 30px;
-}
-.form-group {
-  margin-bottom: 15px;
-}
-label {
-  display: block;
-  margin-bottom: 5px;
-}
-input, textarea {
+.style-table {
   width: 100%;
+  border-collapse: collapse;
+}
+.style-table th, .style-table td {
+  border: 1px solid #ccc;
   padding: 8px;
-  box-sizing: border-box;
+  text-align: left;
 }
-button {
-  padding: 10px 15px;
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  cursor: pointer;
+.style-table th {
+  background-color: #f2f2f2;
 }
-.style-list ul {
-  list-style-type: none;
-  padding: 0;
-}
-.style-list li {
-  border-bottom: 1px solid #ccc;
-  padding: 10px 0;
+.style-table button {
+  margin-right: 5px;
 }
 </style>

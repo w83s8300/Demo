@@ -9,7 +9,6 @@
           <li><router-link to="/admin/courses">課程列表</router-link></li>
           <li><router-link to="/admin/schedules">課程時間表</router-link></li>
           <li><router-link to="/admin/rooms">教室列表</router-link></li>
-          <li><router-link to="/admin/add-room">新增教室</router-link></li>
           <li><router-link to="/admin/styles">風格</router-link></li>
         </ul>
       </nav>
