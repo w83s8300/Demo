@@ -425,16 +425,19 @@ export default {
         if (response.ok && result.success) {
           console.log('=== 後端回應成功 ===');
           console.log('報名編號:', result.enrollment.id);
+          console.log('剩餘堂數:', result.enrollment.remainingClasses);
           console.log('完整回應:', result);
           console.log('==================');
           
-          // 顯示報名成功訊息
-          alert(`${this.studentName} 您好！\n您已成功報名 ${lesson.name} 課程！\n報名編號：${result.enrollment.id}\n時間：${lesson.day} ${lesson.time}\n老師：${lesson.teacher}\n\n報名資料已儲存至資料庫！`);
+          // 顯示報名成功訊息（包含剩餘堂數）
+          const remainingClasses = result.enrollment.remainingClasses;
+          alert(`${this.studentName} 您好！\n您已成功報名 ${lesson.name} 課程！\n\n報名詳情：\n• 報名編號：${result.enrollment.id}\n• 時間：${lesson.day} ${lesson.time}\n• 老師：${lesson.teacher}\n• 扣除堂數：1堂\n• 剩餘堂數：${remainingClasses}堂\n\n報名資料已儲存至資料庫！`);
           
           // 報名成功後關閉 Modal
           this.closeModal();
         } else {
           console.error('報名失敗:', result);
+          // 顯示後端回傳的具體錯誤訊息
           alert(`報名失敗：${result.error || result.message || '未知錯誤'}`);
         }
 

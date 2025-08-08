@@ -8,9 +8,13 @@ import './assets/css/app.css';
 import AOS from 'aos';
 import 'aos/dist/aos.css'; // Import AOS CSS
 
+import VCalendar from 'v-calendar';
+import 'v-calendar/dist/style.css'; // Import v-calendar CSS
+
 const app = createApp(App);
 
 app.use(router);
+app.use(VCalendar, {}); // Use v-calendar
 
 app.mount('#app');
 

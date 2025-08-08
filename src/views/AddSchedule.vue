@@ -18,9 +18,40 @@
           </option>
         </select>
       </div>
+      <!-- 單日或區間模式切換 -->
       <div class="form-group">
+        <label class="d-block mb-1">建立模式:</label>
+        <div class="btn-group" role="group">
+          <button type="button" class="btn btn-sm" :class="mode==='single' ? 'btn-primary' : 'btn-outline-primary'" @click="mode='single'">單日</button>
+          <button type="button" class="btn btn-sm" :class="mode==='range' ? 'btn-primary' : 'btn-outline-primary'" @click="mode='range'">日期區間 + 每週</button>
+        </div>
+      </div>
+
+      <!-- 單日日期 -->
+      <div class="form-group" v-if="mode==='single'">
         <label for="schedule_date">日期:</label>
         <input type="date" id="schedule_date" v-model="schedule.schedule_date" required>
+      </div>
+
+      <!-- 區間日期與星期選擇 -->
+      <div v-else class="border rounded p-2 mb-3 bg-light">
+        <div class="form-group">
+          <label for="start_date">開始日期:</label>
+          <input type="date" id="start_date" v-model="range.start_date" required>
+        </div>
+        <div class="form-group">
+          <label for="end_date">結束日期:</label>
+          <input type="date" id="end_date" v-model="range.end_date" required>
+        </div>
+        <div class="form-group">
+          <label>選擇星期 (可多選):</label>
+          <div class="weekdays">
+            <label v-for="d in weekdays" :key="d.value" class="weekday-item">
+              <input type="checkbox" :value="d.value" v-model="range.weekdays"> {{ d.label }}
+            </label>
+          </div>
+        </div>
+        <small class="text-muted" v-if="generatedDates.length">將建立 {{ generatedDates.length }} 筆排程</small>
       </div>
       <div class="form-group">
         <label for="start_time">開始時間:</label>
@@ -30,7 +61,7 @@
         <label for="end_time">結束時間:</label>
         <input type="time" id="end_time" v-model="schedule.end_time" required>
       </div>
-      <button type="submit" class="btn btn-primary">{{ isEditMode ? '更新' : '新增' }}</button>
+  <button type="submit" class="btn btn-primary">{{ isEditMode ? '更新' : (mode==='single' ? '新增' : '批次新增') }}</button>
       <button type="button" class="btn btn-secondary" @click="closeModal">取消</button>
     </form>
   </div>
@@ -44,6 +75,10 @@ export default {
     scheduleId: {
       type: Number,
       default: null
+    },
+    initialDate: {
+      type: String,
+      default: null
     }
   },
   data() {
@@ -55,10 +90,42 @@ export default {
         start_time: '',
         end_time: ''
       },
+      mode: 'single', // single | range
+      range: {
+        start_date: '',
+        end_date: '',
+        weekdays: [] // Monday ... Sunday
+      },
+      weekdays: [
+        { value: 'Monday', label: '週一' },
+        { value: 'Tuesday', label: '週二' },
+        { value: 'Wednesday', label: '週三' },
+        { value: 'Thursday', label: '週四' },
+        { value: 'Friday', label: '週五' },
+        { value: 'Saturday', label: '週六' },
+        { value: 'Sunday', label: '週日' }
+      ],
       courses: [],
       rooms: [],
       isEditMode: false
     };
+  },
+  computed: {
+    generatedDates() {
+      if (this.mode !== 'range' || !this.range.start_date || !this.range.end_date || this.range.weekdays.length===0) return [];
+      const start = new Date(this.range.start_date);
+      const end = new Date(this.range.end_date);
+      if (end < start) return [];
+      const result = [];
+      const selected = new Set(this.range.weekdays);
+      for (let d = new Date(start); d <= end; d.setDate(d.getDate()+1)) {
+        const dayName = d.toLocaleDateString('en-US', { weekday: 'long' });
+        if (selected.has(dayName)) {
+          result.push(d.toISOString().slice(0,10));
+        }
+      }
+      return result;
+    }
   },
   created() {
     this.fetchCourses();
@@ -66,6 +133,8 @@ export default {
     if (this.scheduleId) {
       this.isEditMode = true;
       this.fetchSchedule(this.scheduleId);
+    } else if (this.initialDate) {
+      this.schedule.schedule_date = this.initialDate;
     }
   },
   methods: {
@@ -107,16 +176,50 @@ export default {
         this.addSchedule();
       }
     },
-    addSchedule() {
-      axios.post('http://localhost:8001/api/schedules', this.schedule)
-        .then(() => {
+    async addSchedule() {
+      if (this.mode === 'single') {
+        try {
+          await axios.post('http://localhost:8001/api/schedules', this.schedule);
           alert('課程時間表新增成功！');
           this.$emit('schedule-updated');
-        })
-        .catch(error => {
+        } catch (error) {
           console.error(error);
           alert('新增課程時間表失敗！');
-        });
+        }
+        return;
+      }
+
+      // range mode
+      const dates = this.generatedDates;
+      if (dates.length === 0) {
+        alert('請確認日期區間與星期選擇正確。');
+        return;
+      }
+      if (!this.schedule.course_id || !this.schedule.start_time || !this.schedule.end_time) {
+        alert('請填寫課程、開始與結束時間。');
+        return;
+      }
+      const failures = [];
+      for (const dateStr of dates) {
+        const payload = {
+          course_id: this.schedule.course_id,
+            room_id: this.schedule.room_id,
+            schedule_date: dateStr,
+            start_time: this.schedule.start_time,
+            end_time: this.schedule.end_time
+        };
+        try {
+          await axios.post('http://localhost:8001/api/schedules', payload);
+        } catch (e) {
+          failures.push(dateStr);
+        }
+      }
+      if (failures.length === 0) {
+        alert(`批次建立成功，共建立 ${dates.length} 筆。`);
+      } else {
+        alert(`部分建立失敗。成功 ${dates.length - failures.length} 筆，失敗 ${failures.length} 筆: \n${failures.join(', ')}`);
+      }
+      this.$emit('schedule-updated');
     },
     updateSchedule() {
       axios.put(`http://localhost:8001/api/schedules/${this.scheduleId}`, this.schedule)
@@ -159,4 +262,21 @@ button {
   border: none;
   cursor: pointer;
 }
+ .weekdays {
+   display: flex;
+   flex-wrap: wrap;
+   gap: 8px;
+ }
+ .weekday-item {
+   font-size: 0.85rem;
+   background: #fff;
+   border: 1px solid #ccc;
+   padding: 4px 8px;
+   border-radius: 4px;
+   cursor: pointer;
+   user-select: none;
+ }
+ .weekday-item input { margin-right: 4px; }
+ .border { border: 1px solid #dee2e6 !important; }
+ .bg-light { background: #f8f9fa !important; }
 </style>
